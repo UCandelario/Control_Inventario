@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Products</title>
+</head>
+<body>
+    <h1>Products</h1>
+    <a href="/register">Login</a>
+    <a href="/">Products</a>
+    <a href="/orders">Orders</a>
+    <input type="text" id="search" placeholder="Search products">
+    <button id="searchButton">Search</button>
+    <ul id="productList"></ul>
+    <script>
+        async function fetchProducts(query = '') {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/api/products${query ? `/buscar?query=${query}` : ''}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const products = await response.json();
+            const productList = document.getElementById('productList');
+            productList.innerHTML = '';
+            products.forEach(product => {
+                const li = document.createElement('li');
+                li.textContent = `${product.nombre} - $${product.precio}`;
+                productList.appendChild(li);
+            });
+        }
+
+        document.getElementById('searchButton').addEventListener('click', () => {
+            const query = document.getElementById('search').value;
+            fetchProducts(query);
+        });
+
+        fetchProducts();
+    </script>
+</body>
+</html>
