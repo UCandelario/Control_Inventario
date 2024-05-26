@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/style.css">
+    <title>Carrito de Compras</title>
+</head>
+<body>
+    <h1>Carrito de Compras</h1>
+    <a href="/login">Login</a>
+    <a href="/register">Register</a>
+    <a href="/products">Products</a>
+    <a href="/orders">Orders</a>
+    
+    <!-- Lista de productos en el carrito -->
+    <ul id="cartItems">
+        <!-- Los elementos del carrito se agregarán aquí dinámicamente con JavaScript -->
+    </ul>
+    
+    <!-- Botón para realizar el pedido -->
+    <button id="placeOrderButton">Realizar Pedido</button>
+    
+    <script>
+        // Función para obtener los productos del carrito desde el servidor
+        async function fetchCartProducts() {
+            const token = localStorage.getItem('token');
+            const response = await fetch('/api/cart', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const cartProducts = await response.json();
+                displayCartProducts(cartProducts);
+            } else {
+                alert('Carrito vacio');
+            }
+        }
+
+        // Función para mostrar los productos en el carrito
+        function displayCartProducts(cartProducts) {
+            const cartItems = document.getElementById('cartItems');
+            cartItems.innerHTML = '';
+            
+            cartProducts.forEach(product => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${product.nombre} - $${product.precio} - Cantidad: ${product.cantidad}`;
+                
+                // Botón para eliminar una unidad del producto
+                const removeButton = document.createElement('button');
+                removeButton.textContent = 'Eliminar una unidad';
+                removeButton.addEventListener('click', () => removeFromCart(product.id_producto));
+
+                listItem.appendChild(removeButton);
+                cartItems.appendChild(listItem);
+            });
+        }
+
+        // Función para eliminar una unidad del producto del carrito
+        async function removeFromCart(productId) {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/api/cart/${productId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                alert('Producto eliminado del carrito');
+                fetchCartProducts(); // Actualizar la lista de productos en el carrito
+            } else {
+                alert('Error al eliminar el producto del carrito');
+            }
+        }
+
+        // Función para realizar el pedido desde el carrito
+        async function placeOrderFromCart() {
+            const cartItems = document.getElementById('cartItems').children;
+            if (cartItems.length === 0) {
+                alert('No tiene ni un producto en tu carrito!');
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            const response = await fetch('/api/cart/place-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                alert('¡Pedido realizado con éxito!');
+                window.location.href = '/orders'; // Redirigir a la página de confirmación
+            } else {
+                alert('Error al realizar el pedido');
+            }
+        }
+
+        // Evento para cargar los productos en el carrito cuando la página se carga
+        window.addEventListener('load', fetchCartProducts);
+        
+        // Evento para realizar el pedido cuando se hace clic en el botón "Realizar Pedido"
+        document.getElementById('placeOrderButton').addEventListener('click', placeOrderFromCart);
+    </script>
+</body>
+</html>

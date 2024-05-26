@@ -2,15 +2,43 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="/css/style.css">
     <title>Orders</title>
 </head>
 <body>
     <h1>Your Orders</h1>
-    <a href="/register">Login</a>
+    <a id="loginLink" href="/login">Login</a>
+    <a href="/register">Register</a>
     <a href="/products">Products</a>
-    <a href="/">Orders</a>
+    <a href="/cart">Cart</a>
+    <button id="logoutButton" style="display: none;">Logout</button>
     <ul id="orderList"></ul>
     <script>
+        // Función para manejar el logout
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            alert('Sesión cerrada');
+            window.location.href = '/login'; // Redirigir a la página de inicio de sesión
+        });
+
+        // Función para mostrar/ocultar elementos dependiendo del estado de autenticación
+        function checkAuthStatus() {
+            const token = localStorage.getItem('token');
+            const logoutButton = document.getElementById('logoutButton');
+            const loginLink = document.getElementById('loginLink');
+
+            if (token) {
+                logoutButton.style.display = 'block';
+                loginLink.style.display = 'none';
+            } else {
+                logoutButton.style.display = 'none';
+                loginLink.style.display = 'block';
+            }
+        }
+
+        // Llamada inicial para establecer el estado correcto
+        checkAuthStatus();
+
         async function fetchOrders() {
             const token = localStorage.getItem('token');
             const response = await fetch('/api/orders', {
@@ -23,7 +51,7 @@
             orderList.innerHTML = '';
             orders.forEach(order => {
                 const li = document.createElement('li');
-                li.textContent = `Order ${order.id} - Total: $${order.total} - Date: ${order.fecha_pedido}`;
+                li.textContent = `Order ${order.id} - Total: $${order.total} - Fecha: ${order.fecha_pedido}`;
                 orderList.appendChild(li);
             });
         }

@@ -2,32 +2,113 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="/css/style.css">
     <title>Products</title>
 </head>
 <body>
     <h1>Products</h1>
-    <a href="/register">Login</a>
-    <a href="/">Products</a>
+    <a id="loginLink" href="/login">Login</a>
+    <a href="/register">Register</a>
+    <a href="/cart">Cart</a>
     <a href="/orders">Orders</a>
+    <button id="logoutButton" style="display: none;">Logout</button>
     <input type="text" id="search" placeholder="Search products">
     <button id="searchButton">Search</button>
     <ul id="productList"></ul>
     <script>
-        async function fetchProducts(query = '') {
+        // Función para manejar el logout
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            alert('Sesión cerrada');
+            window.location.href = '/login'; // Redirigir a la página de inicio de sesión
+        });
+
+        // Función para mostrar/ocultar elementos dependiendo del estado de autenticación
+        function checkAuthStatus() {
             const token = localStorage.getItem('token');
-            const response = await fetch(`/api/products${query ? `/buscar?query=${query}` : ''}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
+            const logoutButton = document.getElementById('logoutButton');
+            const loginLink = document.getElementById('loginLink');
+
+            if (token) {
+                logoutButton.style.display = 'block';
+                loginLink.style.display = 'none';
+            } else {
+                logoutButton.style.display = 'none';
+                loginLink.style.display = 'block';
+            }
+        }
+
+        // Llamada inicial para establecer el estado correcto
+        checkAuthStatus();
+
+        async function fetchProducts(query = '') {
+    const token = localStorage.getItem('token');
+    try {
+        const response = await fetch(`/api/products${query ? `/buscar?query=${query}` : ''}`, {
+            headers: {
+                'Authorization': token ? `Bearer ${token}` : ''
+            }
+        });
+        
+        if (response.status === 401) {
+            alert('Necesitas iniciar sesión para buscar productos');
+            return;
+        }
+
+        const products = await response.json(); // Cambiado a products en lugar de product
+
+        console.log('API Response:', products);  // Verifica el contenido de la respuesta de la API
+
+        // Verifica si 'products' es un array
+        if (!Array.isArray(products)) {
+            throw new Error('La respuesta de la API no es un arreglo');
+        }
+
+        const productList = document.getElementById('productList');
+        productList.innerHTML = '';
+
+        products.forEach(product => {
+            const li = document.createElement('li');
+            li.textContent = `${product.nombre} - $${product.precio} - ${product.descripcion}`;
+            
+            const addButton = document.createElement('button');
+            addButton.textContent = 'Agregar al Carrito';
+            addButton.dataset.productId = product.id;
+            addButton.addEventListener('click', () => {
+                addToCart(product.id);
+            });
+            
+            li.appendChild(addButton);
+            productList.appendChild(li);
+        });
+        
+    } catch (error) {
+        console.error('Fetch products error:', error);
+        alert('Error fetching products');
+    }
+}
+
+        async function addToCart(productId) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/cart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ productId })
+                });
+
+                if (response.ok) {
+                    alert(`Producto ${productId} agregado al carrito`);
+                } else {
+                    throw new Error('Error al agregar el producto al carrito');
                 }
-            });
-            const products = await response.json();
-            const productList = document.getElementById('productList');
-            productList.innerHTML = '';
-            products.forEach(product => {
-                const li = document.createElement('li');
-                li.textContent = `${product.nombre} - $${product.precio}`;
-                productList.appendChild(li);
-            });
+            } catch (error) {
+                console.error('Add to cart error:', error);
+                alert('Hubo un error al procesar la solicitud');
+            }
         }
 
         document.getElementById('searchButton').addEventListener('click', () => {

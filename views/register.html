@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="/css/style.css">
     <title>Register</title>
 </head>
 <body>
@@ -18,7 +19,7 @@
         <br>
         <button type="submit">Register</button>
     </form>
-    <a href="/">Login</a>
+    <a href="/login">Login</a>
     <a href="/products">Products</a>
     <a href="/orders">Orders</a>
     <script>
@@ -38,7 +39,7 @@
 
             if (response.ok) {
                 alert('Registration successful');
-                window.location.href = 'login.html';
+                window.location.href = 'login';
             } else {
                 alert('Registration failed');
             }
