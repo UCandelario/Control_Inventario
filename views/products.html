@@ -16,6 +16,16 @@
     <button id="searchButton">Search</button>
     <ul id="productList"></ul>
     <script>
+        // Obtener el token del almacenamiento local
+        const token = localStorage.getItem('token');
+
+        // Función para manejar el logout
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            alert('Sesión cerrada');
+            window.location.href = '/login'; // Redirigir a la página de inicio de sesión
+        });
+
         // Función para manejar el logout
         document.getElementById('logoutButton').addEventListener('click', () => {
             localStorage.removeItem('token');
