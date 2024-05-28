@@ -16,6 +16,7 @@
         <br>
         <button type="submit">Login</button>
     </form>
+    <div id="message" style="display: none;"></div>
     <a href="/register">Register</a>
     <a href="/products">Products</a>
     <a href="/orders">Orders</a>
@@ -33,13 +34,23 @@
                 body: JSON.stringify({ email, password })
             });
 
+            const message = document.getElementById('message');
+            message.style.display = 'block';
+
             if (response.ok) {
                 const data = await response.json();
                 localStorage.setItem('token', data.token);
-                alert('Login successful');
-                window.location.href = 'products.html';
+                message.textContent = 'Login successful';
+                message.style.color = 'green';
+                setTimeout(() => {
+                    window.location.href = 'products.html';
+                }, 2000);
             } else {
-                alert('Login failed');
+                message.textContent = 'Login failed';
+                message.style.color = 'red';
+                setTimeout(() => {
+                    message.style.display = 'none';
+                }, 3000);
             }
         });
     </script>

@@ -19,6 +19,7 @@
         <br>
         <button type="submit">Register</button>
     </form>
+    <div id="message" style="display: none;"></div>
     <a href="/login">Login</a>
     <a href="/products">Products</a>
     <a href="/orders">Orders</a>
@@ -37,11 +38,21 @@
                 body: JSON.stringify({ nombre, email, password })
             });
 
+            const message = document.getElementById('message');
+            message.style.display = 'block';
+
             if (response.ok) {
-                alert('Registration successful');
-                window.location.href = 'login';
+                message.textContent = 'Registration successful';
+                message.style.color = 'green';
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
             } else {
-                alert('Registration failed');
+                message.textContent = 'Registration failed';
+                message.style.color = 'red';
+                setTimeout(() => {
+                    message.style.display = 'none';
+                }, 3000);
             }
         });
     </script>
