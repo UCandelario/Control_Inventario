@@ -21,8 +21,10 @@ const cartRoutes = require('./routes/cartRoutes');  // Importar las rutas del ca
 app.use('/api/auth', authRoutes);
 app.use('/api/products', authMiddleware, productRoutes); // Aplica el middleware de autenticación para todas las rutas de productos
 app.use('/api/orders', authMiddleware, orderRoutes); // Aplica el middleware de autenticación para todas las rutas de pedidos
+app.delete('/api/orders/cancel', authMiddleware, orderController.cancelOrder);
 app.use('/api/admin', authMiddleware, adminRoutes); // Aplica el middleware de autenticación para todas las rutas de administrador
 app.use('/api/cart', authMiddleware, cartRoutes);  // Aplica el middleware de autenticación para todas las rutas del carrito
+
 
 // Configuración para servir archivos estáticos desde la carpeta 'css'
 app.use('/css', express.static(path.join(__dirname, 'css')));

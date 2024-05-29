@@ -5,7 +5,7 @@ exports.getCart = async (req, res) => {
 
     try {
         const cartItems = await pool.query(
-            'SELECT C.id, C.id_producto, P.nombre, P.precio, C.cantidad FROM Carrito C JOIN Productos P ON C.id_producto = P.id WHERE C.id_usuario = ?',
+            'SELECT C.id, C.id_producto, P.nombre, P.precio, C.cantidad FROM carrito C JOIN productos P ON C.id_producto = P.id WHERE C.id_usuario = ?',
             [userId]
         );
         res.json(cartItems);
@@ -70,7 +70,7 @@ exports.placeOrderFromCart = async (req, res) => {
     try {
         // Obtener los productos del carrito
         const cartItems = await pool.query(
-            'SELECT C.id_producto, P.precio, C.cantidad FROM Carrito C JOIN Productos P ON C.id_producto = P.id WHERE C.id_usuario = ?',
+            'SELECT C.id_producto, P.precio, C.cantidad FROM Carrito C JOIN productos P ON C.id_producto = P.id WHERE C.id_usuario = ?',
             [userId]
         );
 
@@ -81,7 +81,7 @@ exports.placeOrderFromCart = async (req, res) => {
         });
 
         // Crear el pedido
-        const result = await pool.query('INSERT INTO Pedidos (id_usuario, total) VALUES (?, ?)', [userId, total]);
+        const result = await pool.query('INSERT INTO pedidos (id_usuario, total) VALUES (?, ?)', [userId, total]);
         const orderId = result.insertId;
 
         // Crear detalles del pedido
