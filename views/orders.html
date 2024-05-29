@@ -13,6 +13,7 @@
     <a href="/cart">Cart</a>
     <button id="logoutButton" style="display: none;">Logout</button>
     <ul id="orderList"></ul>
+    <div id="message" style="display: none;"></div>
     <script>
         // Obtener el token del almacenamiento local
         const token = localStorage.getItem('token');
@@ -20,15 +21,10 @@
         // Función para manejar el logout
         document.getElementById('logoutButton').addEventListener('click', () => {
             localStorage.removeItem('token');
-            alert('Sesión cerrada');
-            window.location.href = '/login'; // Redirigir a la página de inicio de sesión
-        });
-        
-        // Función para manejar el logout
-        document.getElementById('logoutButton').addEventListener('click', () => {
-            localStorage.removeItem('token');
-            alert('Sesión cerrada');
-            window.location.href = '/login'; // Redirigir a la página de inicio de sesión
+            showMessage('Sesión cerrada', 'green');
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 2000);
         });
 
         // Función para mostrar/ocultar elementos dependiendo del estado de autenticación
@@ -51,22 +47,59 @@
 
         async function fetchOrders() {
             const token = localStorage.getItem('token');
-            const response = await fetch('/api/orders', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
+            try {
+                const response = await fetch('/api/orders', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error fetching orders');
                 }
-            });
-            const orders = await response.json();
-            const orderList = document.getElementById('orderList');
-            orderList.innerHTML = '';
-            orders.forEach(order => {
-                const li = document.createElement('li');
-                li.textContent = `Order ${order.id} - Total: $${order.total} - Fecha: ${order.fecha_pedido}`;
-                orderList.appendChild(li);
-            });
+
+                const orders = await response.json();
+                const orderList = document.getElementById('orderList');
+                orderList.innerHTML = '';
+
+                orders.forEach(order => {
+                    const li = document.createElement('li');
+                    const orderDate = new Date(order.fecha_pedido).toLocaleDateString();
+
+                    li.innerHTML = `<strong>Order ${order.id}</strong> - Total: $${order.total} - Fecha: ${orderDate}<ul></ul>`;
+                    const productList = li.querySelector('ul');
+
+                    if (Array.isArray(order.productos)) {
+                        order.productos.forEach(product => {
+                            const productItem = document.createElement('li');
+                            productItem.textContent = `${product.nombre} - Cantidad: ${product.cantidad} - Precio: $${product.precio}`;
+                            productList.appendChild(productItem);
+                        });
+                    } else {
+                        const noProductsItem = document.createElement('li');
+                        noProductsItem.textContent = 'No hay productos en esta orden';
+                        productList.appendChild(noProductsItem);
+                    }
+
+                    orderList.appendChild(li);
+                });
+            } catch (error) {
+                console.error('Fetch orders error:', error);
+                showMessage('Error al obtener las órdenes', 'red');
+            }
         }
 
         fetchOrders();
+
+        function showMessage(text, color) {
+            const message = document.getElementById('message');
+            message.textContent = text;
+            message.style.color = color;
+            message.style.display = 'block';
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 3000);
+        }
     </script>
 </body>
 </html>

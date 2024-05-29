@@ -15,25 +15,18 @@
     <input type="text" id="search" placeholder="Search products">
     <button id="searchButton">Search</button>
     <ul id="productList"></ul>
+    <div id="message" style="display: none;"></div>
     <script>
-        // Obtener el token del almacenamiento local
         const token = localStorage.getItem('token');
 
-        // Función para manejar el logout
         document.getElementById('logoutButton').addEventListener('click', () => {
             localStorage.removeItem('token');
-            alert('Sesión cerrada');
-            window.location.href = '/login'; // Redirigir a la página de inicio de sesión
+            showMessage('Sesión cerrada', 'green');
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 2000);
         });
 
-        // Función para manejar el logout
-        document.getElementById('logoutButton').addEventListener('click', () => {
-            localStorage.removeItem('token');
-            alert('Sesión cerrada');
-            window.location.href = '/login'; // Redirigir a la página de inicio de sesión
-        });
-
-        // Función para mostrar/ocultar elementos dependiendo del estado de autenticación
         function checkAuthStatus() {
             const token = localStorage.getItem('token');
             const logoutButton = document.getElementById('logoutButton');
@@ -48,55 +41,50 @@
             }
         }
 
-        // Llamada inicial para establecer el estado correcto
         checkAuthStatus();
 
         async function fetchProducts(query = '') {
-    const token = localStorage.getItem('token');
-    try {
-        const response = await fetch(`/api/products${query ? `/buscar?query=${query}` : ''}`, {
-            headers: {
-                'Authorization': token ? `Bearer ${token}` : ''
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`/api/products${query ? `/buscar?query=${query}` : ''}`, {
+                    headers: {
+                        'Authorization': token ? `Bearer ${token}` : ''
+                    }
+                });
+
+                if (response.status === 401) {
+                    showMessage('Necesitas iniciar sesión para buscar productos', 'red');
+                    return;
+                }
+
+                const products = await response.json();
+                if (!Array.isArray(products)) {
+                    throw new Error('La respuesta de la API no es un arreglo');
+                }
+
+                const productList = document.getElementById('productList');
+                productList.innerHTML = '';
+
+                products.forEach(product => {
+                    const li = document.createElement('li');
+                    li.textContent = `${product.nombre} - $${product.precio} - ${product.descripcion}`;
+                    
+                    const addButton = document.createElement('button');
+                    addButton.textContent = 'Agregar al Carrito';
+                    addButton.dataset.productId = product.id;
+                    addButton.addEventListener('click', () => {
+                        addToCart(product.id);
+                    });
+
+                    li.appendChild(addButton);
+                    productList.appendChild(li);
+                });
+
+            } catch (error) {
+                console.error('Fetch products error:', error);
+                showMessage('Error fetching products', 'red');
             }
-        });
-        
-        if (response.status === 401) {
-            alert('Necesitas iniciar sesión para buscar productos');
-            return;
         }
-
-        const products = await response.json(); // Cambiado a products en lugar de product
-
-        console.log('API Response:', products);  // Verifica el contenido de la respuesta de la API
-
-        // Verifica si 'products' es un array
-        if (!Array.isArray(products)) {
-            throw new Error('La respuesta de la API no es un arreglo');
-        }
-
-        const productList = document.getElementById('productList');
-        productList.innerHTML = '';
-
-        products.forEach(product => {
-            const li = document.createElement('li');
-            li.textContent = `${product.nombre} - $${product.precio} - ${product.descripcion}`;
-            
-            const addButton = document.createElement('button');
-            addButton.textContent = 'Agregar al Carrito';
-            addButton.dataset.productId = product.id;
-            addButton.addEventListener('click', () => {
-                addToCart(product.id);
-            });
-            
-            li.appendChild(addButton);
-            productList.appendChild(li);
-        });
-        
-    } catch (error) {
-        console.error('Fetch products error:', error);
-        alert('Error fetching products');
-    }
-}
 
         async function addToCart(productId) {
             try {
@@ -111,13 +99,13 @@
                 });
 
                 if (response.ok) {
-                    alert(`Producto ${productId} agregado al carrito`);
+                    showMessage(`Producto ${productId} agregado al carrito`, 'green');
                 } else {
                     throw new Error('Error al agregar el producto al carrito');
                 }
             } catch (error) {
                 console.error('Add to cart error:', error);
-                alert('Hubo un error al procesar la solicitud');
+                showMessage('Hubo un error al procesar la solicitud', 'red');
             }
         }
 
@@ -125,6 +113,16 @@
             const query = document.getElementById('search').value;
             fetchProducts(query);
         });
+
+        function showMessage(text, color) {
+            const message = document.getElementById('message');
+            message.textContent = text;
+            message.style.color = color;
+            message.style.display = 'block';
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 3000);
+        }
 
         fetchProducts();
     </script>

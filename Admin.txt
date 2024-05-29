@@ -1,0 +1,26 @@
+
+1. Iniciar sesión:
+curl -X POST -H "Content-Type: application/json" -d "{\"email\":\"admin@mitiendita.com\",\"password\":\"admin_password\"}" http://localhost:4000/auth/login
+
+
+2. Recuperar todos los clientes:
+
+curl -X GET -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sIjoiYWRtaW4iLCJpYXQiOjE3MTY5MDQ2NDksImV4cCI6MTcxNjkwODI0OX0.CCi4lVvfDX7IsZwpwQN4UOnVZdwl9NqhtNzGgucrPHM" http://localhost:4000/api/admin/clientes
+
+
+3. Recuperar todos los productos:
+curl -X GET -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sIjoiYWRtaW4iLCJpYXQiOjE3MTY5MDQ2NDksImV4cCI6MTcxNjkwODI0OX0.CCi4lVvfDX7IsZwpwQN4UOnVZdwl9NqhtNzGgucrPHM" http://localhost:4000/api/products
+
+
+4. Modificar un producto (método PUT):
+
+para modificar el producto con id 1:
+
+curl -X PUT -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sIjoiYWRtaW4iLCJpYXQiOjE3MTY5MDQ2NDksImV4cCI6MTcxNjkwODI0OX0.CCi4lVvfDX7IsZwpwQN4UOnVZdwl9NqhtNzGgucrPHM" -d "{\"nombre\":\"Nuevo nombre\",\"descripcion\":\"Nueva descripción\",\"precio\":99.99,\"stock\":50}" http://localhost:4000/api/admin/productos/1
+
+
+5. Agregar un producto nuevo:
+
+curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sIjoiYWRtaW4iLCJpYXQiOjE3MTY5MDQ2NDksImV4cCI6MTcxNjkwODI0OX0.CCi4lVvfDX7IsZwpwQN4UOnVZdwl9NqhtNzGgucrPHM" -d "{\"nombre\":\"Nuevo producto\",\"descripcion\":\"Descripción del nuevo producto\",\"precio\":29.99,\"stock\":100}" http://localhost:4000/api/admin/productos
+
+
