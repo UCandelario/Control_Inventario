@@ -33,7 +33,7 @@ exports.addProduct = async (req, res) => {
   const { nombre, descripcion, precio, stock } = req.body;
   try {
     await pool.query('INSERT INTO Productos (nombre, descripcion, precio, stock) VALUES (?, ?, ?, ?)', [nombre, descripcion, precio, stock]);
-    res.status(201).send('Product added');
+    res.status(201).send('Product added');//res.json({msg:'product added',id:insertedId})
   } catch (error) {
     res.status(500).send('Error adding product');
   }
